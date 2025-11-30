@@ -763,198 +763,166 @@ function DocumentPreview({ data, onBack, onDownloadPDF, onDownloadDOC }: {
           </div>
         </div>
 
-        <div id="document-content" className="bg-white shadow-2xl rounded-2xl border border-gray-200 overflow-hidden">
-          {/* Document Container with proper margins */}
-          <div className="p-10 max-w-4xl mx-auto" style={{ fontFamily: 'Times, serif' }}>
+        <div id="document-content" className="bg-white shadow-lg border border-gray-300">
+          <div className="p-12 max-w-4xl mx-auto" style={{ fontFamily: 'Times New Roman, serif', lineHeight: '1.6', color: 'black' }}>
             
             {/* Document Header */}
-            <div className="text-center border-b-4 border-black pb-6 mb-8">
-              <div className="flex items-center justify-start mb-4">
-                <img 
-                  src="/ongc_logo.png" 
-                  alt="ONGC Logo" 
-                  className="h-16 w-auto mr-6"
-                />
-                <div className="text-center flex-1">
-                  <h1 className="text-2xl font-bold mb-3 text-black tracking-wide uppercase">OIL AND NATURAL GAS CORPORATION</h1>
-                  <h2 className="text-xl font-bold mb-4 text-black tracking-wide uppercase">OPERATION GROUP MEHASANA ASSET</h2>
+            <div className="text-center border-b-2 border-black pb-4 mb-6">
+              <div className="flex items-center justify-center mb-2">
+                <img src="/ongc_logo.png" alt="ONGC Logo" className="h-16 w-auto mr-4" />
+                <div>
+                  <h1 className="text-xl font-bold mb-1 tracking-wide">OIL AND NATURAL GAS CORPORATION</h1>
+                  <h2 className="text-lg font-semibold text-gray-800">OPERATION GROUP MEHASANA ASSET</h2>
                 </div>
               </div>
-              <div className="flex justify-between items-center text-base font-semibold">
-                <span className="text-black">Work Order no- </span>
-                <span className="text-black font-bold">{data.workOrderNo}</span>
+              <div className="text-center">
+                <p className="font-semibold">Work Order no- {data.workOrderNo}</p>
               </div>
             </div>
 
             {/* Work Order Section */}
-            <div className="mb-10">
-              <div className="text-center mb-6 bg-gray-50 py-3 border border-gray-300">
-                <h3 className="text-lg font-bold text-black tracking-wide uppercase">WORK ORDER AND COMPLETION CERTIFICATION</h3>
-                <p className="text-sm text-black font-medium">(Leakage Repairs)</p>
+            <div className="mb-8">
+              <div className="text-center mb-6">
+                <h3 className="text-lg font-bold uppercase tracking-wide">WORK ORDER AND COMPLETION CERTIFICATION</h3>
+                <p className="text-sm font-medium">(Leakage Repairs)</p>
               </div>
 
-              <div className="mb-6 bg-gray-100 p-4 border-l-4 border-blue-600">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                  <div className="text-black">
-                    <span className="font-semibold">NAME OF INSTALLATION:</span>
-                    <span className="ml-2 font-bold text-blue-800">{data.installationName}</span>
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-4">
+                  <div>
+                    <span className="font-semibold">Name of Installation:</span>
+                    <span className="ml-2 font-bold">{data.installationName}</span>
                   </div>
-                  <div className="text-black text-right">
+                  <div>
                     <span className="font-semibold">DATE:</span>
-                    <span className="ml-2 font-bold text-blue-800">{data.date}</span>
+                    <span className="ml-2 font-bold">{data.date}</span>
                   </div>
                 </div>
-                <div className="text-center">
-                  <p className="font-bold text-black text-lg tracking-wide">(WORK ORDER)</p>
+                <div className="text-center border-t border-b border-black py-2">
+                  <p className="font-bold text-lg">(WORK ORDER)</p>
                 </div>
               </div>
 
-              <div className="mb-6 space-y-3 leading-relaxed">
-                <div className="border-l-4 border-green-600 pl-4">
-                  <p className="text-black text-base">
-                    <span className="font-semibold">Kindly attend following:</span>
-                    <br />
-                    <span className="font-bold text-green-800 text-lg">{data.workDescription}</span>
-                  </p>
-                </div>
-                
-                <div className="border-l-4 border-orange-600 pl-4">
-                  <p className="text-black text-base">
-                    <span className="font-semibold">Details of line:</span>
-                    <br />
-                    <span className="font-medium text-orange-800">{data.workDetails}</span>
-                  </p>
-                </div>
-                
-                <div className="flex justify-between items-center bg-yellow-50 p-3 border border-yellow-300">
-                  <span className="text-black font-semibold">Name of the land owner:</span>
-                  <span className="text-black font-bold text-yellow-800">{data.landOwner}</span>
-                </div>
-                
-                <p className="text-black">
-                  <span className="font-semibold">Leakage Information Report No.:</span>
-                  <span className="ml-2 font-medium">{data.leakageReportNo || 'N/A'}</span>
+              <div className="mb-6 space-y-4">
+                <p>
+                  <span className="font-semibold">Kindly attend following:</span> 
+                  <span className="font-bold ml-2">{data.workDescription}</span>
                 </p>
                 
-                <p className="text-black font-semibold text-center bg-blue-50 p-2 border border-blue-300">
+                <p>
+                  <span className="font-semibold">Details of line:</span> 
+                  <span className="ml-2">{data.workDetails}</span>
+                </p>
+                
+                <p>
+                  <span className="font-semibold">Name of the land owner:</span>
+                  <span className="ml-2 font-bold">{data.landOwner}</span>
+                </p>
+                
+                <p>
+                  <span className="font-semibold">Leakage Information Report No.:</span>
+                  <span className="ml-2">{data.leakageReportNo || 'N/A'}</span>
+                </p>
+                
+                <p className="text-center font-semibold border-t border-b border-black py-2">
                   Material Supplied by the Contractor
                 </p>
               </div>
 
               {/* Materials Table */}
               <div className="mb-8">
-                <div className="bg-gray-50 border-2 border-gray-300 rounded-lg overflow-hidden">
-                  <div className="bg-gray-200 p-3 border-b border-gray-300">
-                    <h4 className="text-black font-bold text-center">MATERIALS LIST</h4>
-                  </div>
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr className="bg-gray-100 border-b-2 border-gray-400">
-                        <th className="py-3 px-4 text-left text-black font-bold">DESCRIPTION</th>
-                        <th className="py-3 px-4 text-center text-black font-bold">QUANTITY</th>
-                        <th className="py-3 px-4 text-center text-black font-bold">UNIT</th>
+                <table className="w-full border-collapse border-2 border-black">
+                  <thead>
+                    <tr className="border-b-2 border-black">
+                      <th className="py-3 px-4 text-left font-bold border-r border-black">DESCRIPTION</th>
+                      <th className="py-3 px-4 text-center font-bold border-r border-black">QUANTITY</th>
+                      <th className="py-3 px-4 text-center font-bold">UNIT</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.materials.map((material, index) => (
+                      <tr key={index} className="border-b border-black">
+                        <td className="py-3 px-4 text-left border-r border-black">{material.description}</td>
+                        <td className="py-3 px-4 text-center font-bold border-r border-black">{material.quantity}</td>
+                        <td className="py-3 px-4 text-center font-semibold">{material.unit}</td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {data.materials.map((material, index) => (
-                        <tr key={index} className={`border-b border-gray-300 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                          <td className="py-3 px-4 text-left text-black font-medium">{material.description}</td>
-                          <td className="py-3 px-4 text-center text-black font-bold text-blue-800">{material.quantity}</td>
-                          <td className="py-3 px-4 text-center text-black font-semibold">{material.unit}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                    ))}
+                  </tbody>
+                </table>
               </div>
 
-              <div className="text-right mb-10 border-t border-gray-400 pt-4">
-                <p className="text-black font-semibold">Signature of instt I/C</p>
-                <div className="mt-2 ml-auto border-b-2 border-black w-48"></div>
+              <div className="text-right mb-8 pt-8">
+                <p className="font-semibold mb-3">Signature of instt I/C</p>
+                <div className="ml-auto border-b-2 border-black w-48"></div>
               </div>
             </div>
 
             {/* Completion Certificate Section */}
-            <div className="border-t-4 border-black pt-8">
-              <div className="text-center mb-6 bg-green-50 py-3 border border-green-300">
-                <h3 className="text-lg font-bold text-black tracking-wide uppercase">COMPLETION CERTIFICATE</h3>
+            <div className="border-t-2 border-black pt-8">
+              <div className="text-center mb-6">
+                <h3 className="text-lg font-bold tracking-wide uppercase">COMPLETION CERTIFICATE</h3>
               </div>
               
-              <div className="mb-8 space-y-4 leading-relaxed">
-                <div className="bg-green-50 p-4 border-l-4 border-green-600">
-                  <p className="text-black text-base">
-                    <span className="font-semibold">Certified that the following:</span>
-                    <br />
-                    <span className="font-bold text-green-800">{data.workDescription}</span>
-                  </p>
-                </div>
+              <div className="mb-8 space-y-4">
+                <p>
+                  <span className="font-semibold">Certified that the following:</span>
+                  <span className="font-bold ml-2">{data.workDescription}</span>
+                </p>
                 
-                <div className="bg-blue-50 p-4 border-l-4 border-blue-600">
-                  <p className="text-black text-base">
-                    <span className="font-semibold">Details of Repair:</span>
-                    <br />
-                    <span className="font-medium text-blue-800">{data.workDetails}</span>
-                  </p>
-                </div>
+                <p>
+                  <span className="font-semibold">Details of Repair:</span>
+                  <span className="ml-2">{data.workDetails}</span>
+                </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-gray-50 p-3 border border-gray-300">
-                    <span className="text-black font-semibold">Clamping:</span>
-                    <span className="ml-2 text-black font-medium">{data.clamping || 'N/A'}</span>
-                  </div>
-                  <div className="bg-gray-50 p-3 border border-gray-300">
-                    <span className="text-black font-semibold">Length pipe Changed:</span>
-                    <span className="ml-2 text-black font-medium">{data.lengthPipeChanged || 'N/A'}</span>
-                  </div>
-                </div>
-
-                <div className="bg-yellow-50 p-4 border border-yellow-300 rounded">
-                  <p className="text-black text-base">
-                    <span className="font-semibold">Jobs Done:</span>
-                    <span className="ml-2 font-bold text-yellow-800">{data.jobType}</span>
+                  <p>
+                    <span className="font-semibold">Clamping:</span>
+                    <span className="ml-2">{data.clamping || 'N/A'}</span>
+                  </p>
+                  <p>
+                    <span className="font-semibold">Length pipe Changed:</span>
+                    <span className="ml-2">{data.lengthPipeChanged || 'N/A'}</span>
                   </p>
                 </div>
 
-                <div className="bg-purple-50 p-4 border border-purple-300 rounded">
-                  <p className="text-black text-base">
-                    <span className="font-semibold">Name of the Agency:</span>
-                    <span className="ml-2 font-bold text-purple-800">{data.agencyName}</span>
-                  </p>
-                </div>
+                <p>
+                  <span className="font-semibold">Jobs Done: -</span>
+                  <span className="ml-2 font-bold">{data.jobType}</span>
+                </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-green-50 p-3 border border-green-300">
-                    <span className="text-black font-semibold">Job taken on:</span>
-                    <br />
-                    <span className="text-green-800 font-bold">{data.date} at {data.jobTakenTime} hours</span>
-                  </div>
-                  <div className="bg-red-50 p-3 border border-red-300">
-                    <span className="text-black font-semibold">Job completed on:</span>
-                    <br />
-                    <span className="text-red-800 font-bold">{data.date} at {data.jobCompletedTime} hours</span>
-                  </div>
-                </div>
+                <p>
+                  <span className="font-semibold">Name of the Agency:</span>
+                  <span className="ml-2 font-bold">{data.agencyName}</span>
+                </p>
 
-                <div className="bg-gray-50 p-3 border border-gray-300">
-                  <span className="text-black font-semibold">Line Retrieved and ope:</span>
-                  <span className="ml-2 text-black font-medium">at {data.lineRetrieved || 'N/A'} hours</span>
-                </div>
+                <p>
+                  <span className="font-semibold">Job taken on:</span>
+                  <span className="ml-2 font-bold">at {data.date} hours {data.jobTakenTime}</span>
+                </p>
+                
+                <p>
+                  <span className="font-semibold">Job completed on:</span>
+                  <span className="ml-2 font-bold">at {data.date} hours {data.jobCompletedTime}</span>
+                </p>
+
+                <p>
+                  <span className="font-semibold">Line Retrieved and ope:</span>
+                  <span className="ml-2">at hours {data.lineRetrieved || ''}</span>
+                </p>
               </div>
 
               {/* Signature Section */}
-              <div className="mt-12 pt-6 border-t-2 border-gray-400">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                  <div className="text-center bg-blue-50 p-6 border-2 border-blue-300 rounded">
-                    <p className="text-black font-bold text-lg mb-2">Signature of C & M</p>
-                    <p className="text-black font-medium mb-4">With Date:</p>
-                    <div className="mt-8 border-b-2 border-black w-full"></div>
-                    <p className="text-xs text-gray-600 mt-2">Construction & Maintenance</p>
+              <div className="mt-12 pt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+                  <div className="text-center">
+                    <p className="font-bold text-lg mb-2">Signature of C & M</p>
+                    <p className="font-medium mb-4">With Date:</p>
+                    <div className="mt-12 border-b-2 border-black w-full"></div>
                   </div>
-                  <div className="text-center bg-green-50 p-6 border-2 border-green-300 rounded">
-                    <p className="text-black font-bold text-lg mb-2">Signature of Instt</p>
-                    <p className="text-black font-medium mb-4">With Date:</p>
-                    <div className="mt-8 border-b-2 border-black w-full"></div>
-                    <p className="text-xs text-gray-600 mt-2">Installation In-Charge</p>
+                  <div className="text-center">
+                    <p className="font-bold text-lg mb-2">Signature of Instt</p>
+                    <p className="font-medium mb-4">With Date:</p>
+                    <div className="mt-12 border-b-2 border-black w-full"></div>
                   </div>
                 </div>
               </div>
