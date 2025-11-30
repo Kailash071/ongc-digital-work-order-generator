@@ -1,12 +1,22 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
+import Select from 'react-select';
+import CreatableSelect from 'react-select/creatable';
 import { FileText, Plus, Trash2, Download, Eye, Building2 } from 'lucide-react';
 import { generatePDF, generateDOC } from './lib/pdf-generator';
+
+// Import JSON data
+import workDescriptionsData from './data/workDescriptions.json';
+import materialsData from './data/materials.json';
+import installationsData from './data/installations.json';
+import agenciesData from './data/agencies.json';
+import unitsData from './data/units.json';
+import jobTypesData from './data/jobTypes.json';
 
 // Form schema
 const workOrderSchema = z.object({
@@ -32,6 +42,86 @@ const workOrderSchema = z.object({
 });
 
 type WorkOrderData = z.infer<typeof workOrderSchema>;
+
+// Transform JSON data to react-select format
+const workDescriptionOptions = workDescriptionsData.map(item => ({ value: item, label: item }));
+const materialOptions = materialsData.map(item => ({ value: item, label: item }));
+const installationOptions = installationsData.map(item => ({ value: item, label: item }));
+const agencyOptions = agenciesData.map(item => ({ value: item, label: item }));
+
+// Custom styles for react-select
+const customSelectStyles = {
+  control: (base: Record<string, unknown>) => ({
+    ...base,
+    minHeight: '48px',
+    border: '2px solid #d1d5db',
+    borderRadius: '0.5rem',
+    fontSize: '0.875rem',
+    backgroundColor: '#ffffff',
+    '&:hover': {
+      borderColor: '#9ca3af'
+    },
+    '&:focus-within': {
+      borderColor: 'transparent',
+      boxShadow: '0 0 0 2px #6b7280'
+    }
+  }),
+  valueContainer: (base: Record<string, unknown>) => ({
+    ...base,
+    padding: '0 16px'
+  }),
+  placeholder: (base: Record<string, unknown>) => ({
+    ...base,
+    color: '#6b7280',
+    fontSize: '0.875rem'
+  }),
+  singleValue: (base: Record<string, unknown>) => ({
+    ...base,
+    color: '#111827',
+    fontSize: '0.875rem'
+  }),
+  input: (base: Record<string, unknown>) => ({
+    ...base,
+    color: '#111827',
+    fontSize: '0.875rem'
+  }),
+  menu: (base: Record<string, unknown>) => ({
+    ...base,
+    backgroundColor: '#ffffff',
+    border: '1px solid #d1d5db',
+    borderRadius: '0.5rem',
+    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+    zIndex: 50
+  }),
+  menuList: (base: Record<string, unknown>) => ({
+    ...base,
+    padding: '4px 0',
+    maxHeight: '200px'
+  }),
+  option: (base: Record<string, unknown>, { isFocused, isSelected }: { isFocused: boolean; isSelected: boolean }) => ({
+    ...base,
+    backgroundColor: isSelected ? '#3b82f6' : isFocused ? '#f3f4f6' : '#ffffff',
+    color: isSelected ? '#ffffff' : '#111827',
+    fontSize: '0.875rem',
+    padding: '8px 16px',
+    cursor: 'pointer',
+    '&:active': {
+      backgroundColor: isSelected ? '#3b82f6' : '#e5e7eb'
+    }
+  }),
+  noOptionsMessage: (base: Record<string, unknown>) => ({
+    ...base,
+    color: '#6b7280',
+    fontSize: '0.875rem',
+    padding: '8px 16px'
+  }),
+  loadingMessage: (base: Record<string, unknown>) => ({
+    ...base,
+    color: '#6b7280',
+    fontSize: '0.875rem',
+    padding: '8px 16px'
+  })
+};
 
 // Navbar Component
 function Navbar() {
@@ -267,11 +357,22 @@ export default function Home() {
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Installation Name *
                   </label>
-                  <input
-                    type="text"
-                    {...register('installationName')}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 bg-white text-gray-900 placeholder-gray-500"
-                    placeholder="e.g., Santhal Main"
+                  <Controller
+                    name="installationName"
+                    control={control}
+                    render={({ field }) => (
+                      <CreatableSelect
+                        {...field}
+                        options={installationOptions}
+                        value={installationOptions.find(option => option.value === field.value) || { value: field.value, label: field.value }}
+                        onChange={(option) => field.onChange(option?.value || '')}
+                        placeholder="e.g., Santhal Main"
+                        styles={customSelectStyles}
+                        isClearable
+                        isSearchable
+                        formatCreateLabel={(inputValue) => `Create "${inputValue}"`}
+                      />
+                    )}
                   />
                   {errors.installationName && (
                     <p className="text-red-500 text-sm mt-1 flex items-center">
@@ -302,11 +403,22 @@ export default function Home() {
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Agency Name *
                   </label>
-                  <input
-                    type="text"
-                    {...register('agencyName')}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 bg-white text-gray-900 placeholder-gray-500"
-                    placeholder="e.g., NAVBHARAT CONSTRUCTION"
+                  <Controller
+                    name="agencyName"
+                    control={control}
+                    render={({ field }) => (
+                      <CreatableSelect
+                        {...field}
+                        options={agencyOptions}
+                        value={agencyOptions.find(option => option.value === field.value) || { value: field.value, label: field.value }}
+                        onChange={(option) => field.onChange(option?.value || '')}
+                        placeholder="e.g., NAVBHARAT CONSTRUCTION"
+                        styles={customSelectStyles}
+                        isClearable
+                        isSearchable
+                        formatCreateLabel={(inputValue) => `Create "${inputValue}"`}
+                      />
+                    )}
                   />
                   {errors.agencyName && (
                     <p className="text-red-500 text-sm mt-1 flex items-center">
@@ -329,11 +441,22 @@ export default function Home() {
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Work Description *
                     </label>
-                    <input
-                      type="text"
-                      {...register('workDescription')}
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 bg-white text-gray-900 placeholder-gray-500"
-                      placeholder="e.g., SN#15 WATER INJECTION HEADER MODIFICATION"
+                    <Controller
+                      name="workDescription"
+                      control={control}
+                      render={({ field }) => (
+                        <CreatableSelect
+                          {...field}
+                          options={workDescriptionOptions}
+                          value={workDescriptionOptions.find(option => option.value === field.value) || { value: field.value, label: field.value }}
+                          onChange={(option) => field.onChange(option?.value || '')}
+                          placeholder="e.g., SN#15 WATER INJECTION HEADER MODIFICATION"
+                          styles={customSelectStyles}
+                          isClearable
+                          isSearchable
+                          formatCreateLabel={(inputValue) => `Create "${inputValue}"`}
+                        />
+                      )}
                     />
                     {errors.workDescription && (
                       <p className="text-red-500 text-sm mt-1 flex items-center">
@@ -387,11 +510,22 @@ export default function Home() {
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
                           Material Description *
                         </label>
-                        <input
-                          type="text"
-                          {...register(`materials.${index}.description`)}
-                          className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 bg-white text-gray-900 placeholder-gray-500"
-                          placeholder="e.g., 3'' 3LPE PIPE"
+                        <Controller
+                          name={`materials.${index}.description`}
+                          control={control}
+                          render={({ field }) => (
+                            <CreatableSelect
+                              {...field}
+                              options={materialOptions}
+                              value={materialOptions.find(option => option.value === field.value) || { value: field.value, label: field.value }}
+                              onChange={(option) => field.onChange(option?.value || '')}
+                              placeholder="e.g., 3'' 3LPE PIPE"
+                              styles={customSelectStyles}
+                              isClearable
+                              isSearchable
+                              formatCreateLabel={(inputValue) => `Create "${inputValue}"`}
+                            />
+                          )}
                         />
                         {errors.materials?.[index]?.description && (
                           <p className="text-red-500 text-sm mt-1 flex items-center">
@@ -424,18 +558,22 @@ export default function Home() {
                           <label className="block text-sm font-semibold text-gray-700 mb-2">
                             Unit *
                           </label>
-                          <select
-                            {...register(`materials.${index}.unit`)}
-                            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 bg-white text-gray-900"
-                          >
-                            <option value="">Select Unit</option>
-                            <option value="NOS">NOS</option>
-                            <option value="MTR">MTR</option>
-                            <option value="HRS">HRS</option>
-                            <option value="SET">SET</option>
-                            <option value="BAGS">BAGS</option>
-                            <option value="MTR CUBE">MTR CUBE</option>
-                          </select>
+                          <Controller
+                            name={`materials.${index}.unit`}
+                            control={control}
+                            render={({ field }) => (
+                              <Select
+                                {...field}
+                                options={unitsData}
+                                value={unitsData.find(option => option.value === field.value) || null}
+                                onChange={(option) => field.onChange(option?.value || '')}
+                                placeholder="Select Unit"
+                                styles={customSelectStyles}
+                                isClearable
+                                isSearchable
+                              />
+                            )}
+                          />
                           {errors.materials?.[index]?.unit && (
                             <p className="text-red-500 text-sm mt-1 flex items-center">
                               <span className="w-1 h-1 bg-red-500 rounded-full mr-2"></span>
@@ -504,14 +642,22 @@ export default function Home() {
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Job Type
                     </label>
-                    <select
-                      {...register('jobType')}
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 bg-white text-gray-900"
-                    >
-                      <option value="U/G JOB">U/G JOB</option>
-                      <option value="O/H JOB">O/H JOB</option>
-                      <option value="MAINTENANCE">MAINTENANCE</option>
-                    </select>
+                    <Controller
+                      name="jobType"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          {...field}
+                          options={jobTypesData}
+                          value={jobTypesData.find(option => option.value === field.value) || null}
+                          onChange={(option) => field.onChange(option?.value || '')}
+                          placeholder="Select Job Type"
+                          styles={customSelectStyles}
+                          isClearable
+                          isSearchable
+                        />
+                      )}
+                    />
                   </div>
                 </div>
               </div>
@@ -617,86 +763,200 @@ function DocumentPreview({ data, onBack, onDownloadPDF, onDownloadDOC }: {
           </div>
         </div>
 
-        <div id="document-content" className="bg-white p-8 shadow-2xl rounded-2xl border border-gray-200">
-          {/* Document Header */}
-          <div className="text-center border-b-2 border-black pb-4 mb-6">
-            <h1 className="text-xl font-bold mb-2">OIL AND NATURAL GAS CORPORATION</h1>
-            <h2 className="text-lg font-semibold mb-2">OPERATION GROUP MEHASANA ASSET</h2>
-            <div className="flex justify-between items-center">
-              <span>Work Order no- {data.workOrderNo}</span>
-            </div>
-          </div>
-
-          {/* Work Order Section */}
-          <div className="mb-8">
-            <div className="text-center mb-4">
-              <h3 className="text-lg font-bold">WORK ORDER AND COMPLETION CERTIFICATION</h3>
-              <p className="text-sm">(Leakage Repairs)</p>
-            </div>
-
-            <div className="mb-4">
-              <div className="flex justify-between mb-2">
-                <span>NAME OF INSTALLATION: {data.installationName}</span>
-                <span>DATE: {data.date}</span>
-              </div>
-              <p className="font-bold">(WORK ORDER)</p>
-            </div>
-
-            <div className="mb-4">
-              <p>Kindly attend following: {data.workDescription}</p>
-              <p>Details of line: {data.workDetails}</p>
-              <div className="flex justify-between">
-                <span>Name of the land owner:</span>
-                <span>{data.landOwner}</span>
-              </div>
-              <p>Leakage Information Report No. {data.leakageReportNo || ''}</p>
-              <p>Material Supplied by the Contractor.</p>
-            </div>
-
-            {/* Materials Table */}
-            <div className="mb-6">
-              <table className="w-full">
-                <tbody>
-                  {data.materials.map((material, index) => (
-                    <tr key={index} className="border-b">
-                      <td className="py-1 pr-4 text-left">{material.description}</td>
-                      <td className="py-1 px-4 text-right">{material.quantity}</td>
-                      <td className="py-1 pl-4 text-left">{material.unit}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="text-right mb-8">
-              <p>Signature of instt I/C</p>
-            </div>
-          </div>
-
-          {/* Completion Certificate Section */}
-          <div>
-            <h3 className="text-lg font-bold mb-4">COMPLETION CERTIFICATE</h3>
+        <div id="document-content" className="bg-white shadow-2xl rounded-2xl border border-gray-200 overflow-hidden">
+          {/* Document Container with proper margins */}
+          <div className="p-10 max-w-4xl mx-auto" style={{ fontFamily: 'Times, serif' }}>
             
-            <div className="mb-4">
-              <p>Certified that the following: {data.workDescription}</p>
-              <p>Details of Repair: {data.workDetails}</p>
-              <p>Clamping: {data.clamping || ''}</p>
-              <p>Length pipe Changed: {data.lengthPipeChanged || ''}</p>
-              <p>Jobs Done: - {data.jobType}</p>
-              <p>Name of the Agency: {data.agencyName}</p>
-              <p>Job taken on: at {data.date} hours {data.jobTakenTime}</p>
-              <p>Job completed on: at {data.date} hours {data.jobCompletedTime}</p>
-              <p>Line Retrieved and ope: at hours {data.lineRetrieved || ''}</p>
+            {/* Document Header */}
+            <div className="text-center border-b-4 border-black pb-6 mb-8">
+              <div className="flex items-center justify-start mb-4">
+                <img 
+                  src="/ongc_logo.png" 
+                  alt="ONGC Logo" 
+                  className="h-16 w-auto mr-6"
+                />
+                <div className="text-center flex-1">
+                  <h1 className="text-2xl font-bold mb-3 text-black tracking-wide uppercase">OIL AND NATURAL GAS CORPORATION</h1>
+                  <h2 className="text-xl font-bold mb-4 text-black tracking-wide uppercase">OPERATION GROUP MEHASANA ASSET</h2>
+                </div>
+              </div>
+              <div className="flex justify-between items-center text-base font-semibold">
+                <span className="text-black">Work Order no- </span>
+                <span className="text-black font-bold">{data.workOrderNo}</span>
+              </div>
             </div>
 
-            <div className="flex justify-between mt-8">
-              <div>
-                <p>Signature of C & M</p>
-                <p>With Date:</p>
+            {/* Work Order Section */}
+            <div className="mb-10">
+              <div className="text-center mb-6 bg-gray-50 py-3 border border-gray-300">
+                <h3 className="text-lg font-bold text-black tracking-wide uppercase">WORK ORDER AND COMPLETION CERTIFICATION</h3>
+                <p className="text-sm text-black font-medium">(Leakage Repairs)</p>
               </div>
-              <div>
-                <p>Signature of Instt</p>
-                <p>With Date:</p>
+
+              <div className="mb-6 bg-gray-100 p-4 border-l-4 border-blue-600">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                  <div className="text-black">
+                    <span className="font-semibold">NAME OF INSTALLATION:</span>
+                    <span className="ml-2 font-bold text-blue-800">{data.installationName}</span>
+                  </div>
+                  <div className="text-black text-right">
+                    <span className="font-semibold">DATE:</span>
+                    <span className="ml-2 font-bold text-blue-800">{data.date}</span>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <p className="font-bold text-black text-lg tracking-wide">(WORK ORDER)</p>
+                </div>
+              </div>
+
+              <div className="mb-6 space-y-3 leading-relaxed">
+                <div className="border-l-4 border-green-600 pl-4">
+                  <p className="text-black text-base">
+                    <span className="font-semibold">Kindly attend following:</span>
+                    <br />
+                    <span className="font-bold text-green-800 text-lg">{data.workDescription}</span>
+                  </p>
+                </div>
+                
+                <div className="border-l-4 border-orange-600 pl-4">
+                  <p className="text-black text-base">
+                    <span className="font-semibold">Details of line:</span>
+                    <br />
+                    <span className="font-medium text-orange-800">{data.workDetails}</span>
+                  </p>
+                </div>
+                
+                <div className="flex justify-between items-center bg-yellow-50 p-3 border border-yellow-300">
+                  <span className="text-black font-semibold">Name of the land owner:</span>
+                  <span className="text-black font-bold text-yellow-800">{data.landOwner}</span>
+                </div>
+                
+                <p className="text-black">
+                  <span className="font-semibold">Leakage Information Report No.:</span>
+                  <span className="ml-2 font-medium">{data.leakageReportNo || 'N/A'}</span>
+                </p>
+                
+                <p className="text-black font-semibold text-center bg-blue-50 p-2 border border-blue-300">
+                  Material Supplied by the Contractor
+                </p>
+              </div>
+
+              {/* Materials Table */}
+              <div className="mb-8">
+                <div className="bg-gray-50 border-2 border-gray-300 rounded-lg overflow-hidden">
+                  <div className="bg-gray-200 p-3 border-b border-gray-300">
+                    <h4 className="text-black font-bold text-center">MATERIALS LIST</h4>
+                  </div>
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="bg-gray-100 border-b-2 border-gray-400">
+                        <th className="py-3 px-4 text-left text-black font-bold">DESCRIPTION</th>
+                        <th className="py-3 px-4 text-center text-black font-bold">QUANTITY</th>
+                        <th className="py-3 px-4 text-center text-black font-bold">UNIT</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {data.materials.map((material, index) => (
+                        <tr key={index} className={`border-b border-gray-300 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                          <td className="py-3 px-4 text-left text-black font-medium">{material.description}</td>
+                          <td className="py-3 px-4 text-center text-black font-bold text-blue-800">{material.quantity}</td>
+                          <td className="py-3 px-4 text-center text-black font-semibold">{material.unit}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="text-right mb-10 border-t border-gray-400 pt-4">
+                <p className="text-black font-semibold">Signature of instt I/C</p>
+                <div className="mt-2 ml-auto border-b-2 border-black w-48"></div>
+              </div>
+            </div>
+
+            {/* Completion Certificate Section */}
+            <div className="border-t-4 border-black pt-8">
+              <div className="text-center mb-6 bg-green-50 py-3 border border-green-300">
+                <h3 className="text-lg font-bold text-black tracking-wide uppercase">COMPLETION CERTIFICATE</h3>
+              </div>
+              
+              <div className="mb-8 space-y-4 leading-relaxed">
+                <div className="bg-green-50 p-4 border-l-4 border-green-600">
+                  <p className="text-black text-base">
+                    <span className="font-semibold">Certified that the following:</span>
+                    <br />
+                    <span className="font-bold text-green-800">{data.workDescription}</span>
+                  </p>
+                </div>
+                
+                <div className="bg-blue-50 p-4 border-l-4 border-blue-600">
+                  <p className="text-black text-base">
+                    <span className="font-semibold">Details of Repair:</span>
+                    <br />
+                    <span className="font-medium text-blue-800">{data.workDetails}</span>
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-gray-50 p-3 border border-gray-300">
+                    <span className="text-black font-semibold">Clamping:</span>
+                    <span className="ml-2 text-black font-medium">{data.clamping || 'N/A'}</span>
+                  </div>
+                  <div className="bg-gray-50 p-3 border border-gray-300">
+                    <span className="text-black font-semibold">Length pipe Changed:</span>
+                    <span className="ml-2 text-black font-medium">{data.lengthPipeChanged || 'N/A'}</span>
+                  </div>
+                </div>
+
+                <div className="bg-yellow-50 p-4 border border-yellow-300 rounded">
+                  <p className="text-black text-base">
+                    <span className="font-semibold">Jobs Done:</span>
+                    <span className="ml-2 font-bold text-yellow-800">{data.jobType}</span>
+                  </p>
+                </div>
+
+                <div className="bg-purple-50 p-4 border border-purple-300 rounded">
+                  <p className="text-black text-base">
+                    <span className="font-semibold">Name of the Agency:</span>
+                    <span className="ml-2 font-bold text-purple-800">{data.agencyName}</span>
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-green-50 p-3 border border-green-300">
+                    <span className="text-black font-semibold">Job taken on:</span>
+                    <br />
+                    <span className="text-green-800 font-bold">{data.date} at {data.jobTakenTime} hours</span>
+                  </div>
+                  <div className="bg-red-50 p-3 border border-red-300">
+                    <span className="text-black font-semibold">Job completed on:</span>
+                    <br />
+                    <span className="text-red-800 font-bold">{data.date} at {data.jobCompletedTime} hours</span>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 p-3 border border-gray-300">
+                  <span className="text-black font-semibold">Line Retrieved and ope:</span>
+                  <span className="ml-2 text-black font-medium">at {data.lineRetrieved || 'N/A'} hours</span>
+                </div>
+              </div>
+
+              {/* Signature Section */}
+              <div className="mt-12 pt-6 border-t-2 border-gray-400">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                  <div className="text-center bg-blue-50 p-6 border-2 border-blue-300 rounded">
+                    <p className="text-black font-bold text-lg mb-2">Signature of C & M</p>
+                    <p className="text-black font-medium mb-4">With Date:</p>
+                    <div className="mt-8 border-b-2 border-black w-full"></div>
+                    <p className="text-xs text-gray-600 mt-2">Construction & Maintenance</p>
+                  </div>
+                  <div className="text-center bg-green-50 p-6 border-2 border-green-300 rounded">
+                    <p className="text-black font-bold text-lg mb-2">Signature of Instt</p>
+                    <p className="text-black font-medium mb-4">With Date:</p>
+                    <div className="mt-8 border-b-2 border-black w-full"></div>
+                    <p className="text-xs text-gray-600 mt-2">Installation In-Charge</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

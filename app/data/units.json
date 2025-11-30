@@ -1,0 +1,12 @@
+[
+  { "value": "NOS", "label": "NOS" },
+  { "value": "MTR", "label": "MTR" },
+  { "value": "HRS", "label": "HRS" },
+  { "value": "SET", "label": "SET" },
+  { "value": "BAGS", "label": "BAGS" },
+  { "value": "MTR CUBE", "label": "MTR CUBE" },
+  { "value": "KG", "label": "KG" },
+  { "value": "LITRE", "label": "LITRE" },
+  { "value": "FEET", "label": "FEET" },
+  { "value": "INCH", "label": "INCH" }
+]

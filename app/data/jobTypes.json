@@ -1,0 +1,8 @@
+[
+  { "value": "U/G JOB", "label": "U/G JOB" },
+  { "value": "O/H JOB", "label": "O/H JOB" },
+  { "value": "MAINTENANCE", "label": "MAINTENANCE" },
+  { "value": "INSTALLATION", "label": "INSTALLATION" },
+  { "value": "REPAIR", "label": "REPAIR" },
+  { "value": "TESTING", "label": "TESTING" }
+]
