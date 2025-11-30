@@ -83,7 +83,25 @@ export const generatePDF = async (data: WorkOrderData) => {
     };
 
     tempDiv.innerHTML = `
-      <div style="font-family: 'Times New Roman', Times, serif; font-size: 14px; line-height: 1.6; color: black; max-width: 800px; margin: 0 auto; padding: 40px;">
+      <style>
+        @page {
+          margin: 40px;
+        }
+        .page-content {
+          font-family: 'Times New Roman', Times, serif;
+          font-size: 14px;
+          line-height: 1.6;
+          color: black;
+          max-width: 800px;
+          margin: 0 auto;
+          padding: 0;
+        }
+        .page-break {
+          page-break-before: always;
+          padding-top: 40px;
+        }
+      </style>
+      <div class="page-content">
         <!-- Header -->
         <div style="text-align: center; border-bottom: 2px solid black; padding-bottom: 16px; margin-bottom: 24px;">
           <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
@@ -148,7 +166,7 @@ export const generatePDF = async (data: WorkOrderData) => {
           </div>
 
           <!-- Materials Table -->
-          <div style="margin: 24px 0;">
+          <div style="margin: 24px 0; page-break-inside: avoid;">
             <table style="width: 100%; border-collapse: collapse; border: 2px solid black;">
               <thead>
                 <tr style="border-bottom: 2px solid black;">
@@ -176,7 +194,7 @@ export const generatePDF = async (data: WorkOrderData) => {
         </div>
 
         <!-- Completion Certificate Section -->
-        <div style="border-top: 2px solid black; padding-top: 32px;">
+        <div style="border-top: 2px solid black; padding-top: 32px; page-break-before: auto; page-break-inside: avoid;">
           <div style="text-align: center; margin-bottom: 24px;">
             <h3 style="font-size: 18px; font-weight: bold; margin: 0; letter-spacing: 1px; text-transform: uppercase;">COMPLETION CERTIFICATE</h3>
           </div>
@@ -230,7 +248,7 @@ export const generatePDF = async (data: WorkOrderData) => {
           </div>
 
           <!-- Signature Section -->
-          <div style="margin-top: 48px; padding-top: 24px;">
+          <div style="margin-top: 48px; padding-top: 24px; page-break-inside: avoid;">
             <div style="display: flex; justify-content: space-between; gap: 64px;">
               <div style="text-align: center; width: 45%;">
                 <p style="font-weight: bold; font-size: 18px; margin-bottom: 8px;">Signature of C & M</p>
@@ -251,40 +269,74 @@ export const generatePDF = async (data: WorkOrderData) => {
     // Append to body temporarily
     document.body.appendChild(tempDiv);
 
-    // Generate canvas from the content
+    // Generate canvas from the content with better quality settings
     const canvas = await html2canvas(tempDiv, {
-      scale: 2,
+      scale: 1.5,
       useCORS: true,
       backgroundColor: '#ffffff',
       width: 800,
       height: tempDiv.scrollHeight,
+      allowTaint: false,
+      foreignObjectRendering: false,
+      logging: false,
     });
 
     // Remove the temporary div
     document.body.removeChild(tempDiv);
 
-    // Create PDF
+    // Create PDF with better page handling
     const pdf = new jsPDF('p', 'mm', 'a4');
-    const imgData = canvas.toDataURL('image/png');
     
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
-    const imgWidth = pdfWidth;
+    const margin = 15; // 15mm margin for better spacing
+    const contentWidth = pdfWidth - (2 * margin);
+    const contentHeight = pdfHeight - (2 * margin);
+    
+    const imgWidth = contentWidth;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-    let heightLeft = imgHeight;
-    let position = 0;
-
-    // Add first page
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pdfHeight;
-
-    // Add additional pages if content is longer than one page
-    while (heightLeft >= 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pdfHeight;
+    // Calculate how many "pages worth" of content we have
+    const pageContentHeight = contentHeight; // Height available per page
+    const totalPages = Math.ceil(imgHeight / pageContentHeight);
+    
+    for (let page = 0; page < totalPages; page++) {
+      if (page > 0) {
+        pdf.addPage();
+      }
+      
+      // Create a new canvas for this page's content
+      const pageCanvas = document.createElement('canvas');
+      const pageCtx = pageCanvas.getContext('2d');
+      
+      if (pageCtx) {
+        // Set canvas size to match the content area
+        pageCanvas.width = canvas.width;
+        pageCanvas.height = Math.min(canvas.height - (page * pageContentHeight * canvas.width / imgWidth), 
+                                   pageContentHeight * canvas.width / imgWidth);
+        
+        // Fill with white background
+        pageCtx.fillStyle = 'white';
+        pageCtx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+        
+        // Draw the appropriate section of the original canvas
+        const sourceY = page * pageContentHeight * canvas.width / imgWidth;
+        const sourceHeight = Math.min(pageCanvas.height, canvas.height - sourceY);
+        
+        if (sourceHeight > 0) {
+          pageCtx.drawImage(
+            canvas,
+            0, sourceY, canvas.width, sourceHeight,  // source
+            0, 0, pageCanvas.width, sourceHeight     // destination
+          );
+        }
+        
+        // Convert this page's canvas to image and add to PDF
+        const pageImgData = pageCanvas.toDataURL('image/png', 0.95);
+        const pageImgHeight = (pageCanvas.height * imgWidth) / pageCanvas.width;
+        
+        pdf.addImage(pageImgData, 'PNG', margin, margin, imgWidth, pageImgHeight);
+      }
     }
 
     // Download the PDF

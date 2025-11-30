@@ -7,8 +7,8 @@ import { z } from 'zod';
 import { format } from 'date-fns';
 import Select from 'react-select';
 import CreatableSelect from 'react-select/creatable';
-import { FileText, Plus, Trash2, Download, Eye, Building2 } from 'lucide-react';
-import { generatePDF, generateDOC } from './lib/pdf-generator';
+import { FileText, Plus, Trash2, Download, Eye, Building2, Printer, Loader2 } from 'lucide-react';
+import { generatePDF } from './lib/pdf-generator'; // generateDOC commented out
 
 // Import JSON data
 import workDescriptionsData from './data/workDescriptions.json';
@@ -216,6 +216,7 @@ function Footer() {
 export default function Home() {
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [formData, setFormData] = useState<WorkOrderData | null>(null);
+  const [isPdfLoading, setIsPdfLoading] = useState(false);
 
   const {
     register,
@@ -249,16 +250,28 @@ export default function Home() {
     setIsPreviewMode(true);
   };
 
-  const handleDownloadPDF = () => {
-    if (formData) {
-      generatePDF(formData);
+  const handleDownloadPDF = async () => {
+    if (formData && !isPdfLoading) {
+      setIsPdfLoading(true);
+      try {
+        await generatePDF(formData);
+      } catch (error) {
+        console.error('Error generating PDF:', error);
+      } finally {
+        setIsPdfLoading(false);
+      }
     }
   };
 
-  const handleDownloadDOC = () => {
-    if (formData) {
-      generateDOC(formData);
-    }
+  // DOC download function commented out
+  // const handleDownloadDOC = () => {
+  //   if (formData) {
+  //     generateDOC(formData);
+  //   }
+  // };
+
+  const handlePrint = () => {
+    window.print();
   };
 
   const handleBackToEdit = () => {
@@ -268,9 +281,13 @@ export default function Home() {
   if (isPreviewMode && formData) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
-        <Navbar />
-        <DocumentPreview data={formData} onBack={handleBackToEdit} onDownloadPDF={handleDownloadPDF} onDownloadDOC={handleDownloadDOC} />
-        <Footer />
+        <div className="print-hide">
+          <Navbar />
+        </div>
+        <DocumentPreview data={formData} onBack={handleBackToEdit} onDownloadPDF={handleDownloadPDF} onPrint={handlePrint} isPdfLoading={isPdfLoading} />
+        <div className="print-hide">
+          <Footer />
+        </div>
       </div>
     );
   }
@@ -505,7 +522,7 @@ export default function Home() {
 
                 <div className="space-y-4">
                   {fields.map((field, index) => (
-                    <div key={field.id} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-6 bg-white rounded-xl border-2 border-gray-100 hover:border-purple-200 transition-all duration-200 shadow-sm hover:shadow-md">
+                    <div key={field.id} className="grid grid-cols-1 md:grid-cols-4 gap-3 p-6 bg-white rounded-xl border-2 border-gray-100 hover:border-purple-200 transition-all duration-200 shadow-sm hover:shadow-md">
                       <div className="md:col-span-2">
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
                           Material Description *
@@ -535,14 +552,14 @@ export default function Home() {
                         )}
                       </div>
 
-                      <div>
+                      <div className="min-w-0">
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
                           Quantity *
                         </label>
                         <input
                           type="text"
                           {...register(`materials.${index}.quantity`)}
-                          className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 bg-white text-gray-900 placeholder-gray-500"
+                          className="w-full px-3 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 bg-white text-gray-900 placeholder-gray-500"
                           placeholder="28.800"
                         />
                         {errors.materials?.[index]?.quantity && (
@@ -553,8 +570,8 @@ export default function Home() {
                         )}
                       </div>
 
-                      <div className="flex items-end gap-3">
-                        <div className="flex-1">
+                      <div className="flex gap-2 items-end">
+                        <div className="flex-1 min-w-0">
                           <label className="block text-sm font-semibold text-gray-700 mb-2">
                             Unit *
                           </label>
@@ -567,8 +584,15 @@ export default function Home() {
                                 options={unitsData}
                                 value={unitsData.find(option => option.value === field.value) || null}
                                 onChange={(option) => field.onChange(option?.value || '')}
-                                placeholder="Select Unit"
-                                styles={customSelectStyles}
+                                placeholder="Unit"
+                                styles={{
+                                  ...customSelectStyles,
+                                  control: (provided, state) => ({
+                                    ...customSelectStyles.control?.(provided, state),
+                                    minHeight: '48px',
+                                    fontSize: '14px'
+                                  })
+                                }}
                                 isClearable
                                 isSearchable
                               />
@@ -585,7 +609,7 @@ export default function Home() {
                           <button
                             type="button"
                             onClick={() => remove(index)}
-                            className="p-3 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200"
+                            className="shrink-0 p-3 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200 self-start mt-8"
                             title="Remove material item"
                           >
                             <Trash2 className="w-[18px] h-[18px]" />
@@ -728,17 +752,49 @@ export default function Home() {
 }
 
 // Document Preview Component
-function DocumentPreview({ data, onBack, onDownloadPDF, onDownloadDOC }: { 
+function DocumentPreview({ data, onBack, onDownloadPDF, onPrint, isPdfLoading }: { 
   data: WorkOrderData; 
   onBack: () => void; 
   onDownloadPDF: () => void;
-  onDownloadDOC: () => void; 
+  onPrint: () => void;
+  isPdfLoading: boolean;
 }) {
   return (
-    <div className="flex-1 py-8 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
+    <>
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          @media print {
+            .print-hide {
+              display: none !important;
+            }
+            #document-content {
+              box-shadow: none !important;
+              border: none !important;
+              margin: 0 !important;
+              padding: 0 !important;
+            }
+            body {
+              background: white !important;
+            }
+            header, nav, footer, .navbar, .footer {
+              display: none !important;
+            }
+            .page-break-avoid {
+              page-break-inside: avoid !important;
+            }
+            .signature-section {
+              page-break-inside: avoid !important;
+            }
+            table {
+              page-break-inside: avoid !important;
+            }
+          }
+        `
+      }} />
+      <div className="flex-1 py-8 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
       <div className="max-w-5xl mx-auto px-6">
         {/* Action Bar */}
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+        <div className="print-hide flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
           <button
             onClick={onBack}
             className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
@@ -748,17 +804,40 @@ function DocumentPreview({ data, onBack, onDownloadPDF, onDownloadDOC }: {
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={onDownloadPDF}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              disabled={isPdfLoading}
+              className={`flex items-center gap-2 px-6 py-3 text-white rounded-xl transition-all duration-200 shadow-lg ${
+                isPdfLoading 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 hover:shadow-xl transform hover:-translate-y-0.5'
+              }`}
             >
-              <Download className="w-5 h-5" />
-              Download PDF
+              {isPdfLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Generating PDF...
+                </>
+              ) : (
+                <>
+                  <Download className="w-5 h-5" />
+                  Download PDF
+                </>
+              )}
             </button>
+            {/* DOC Download commented out
             <button
               onClick={onDownloadDOC}
               className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
               <FileText className="w-5 h-5" />
               Download DOC
+            </button>
+            */}
+            <button
+              onClick={onPrint}
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            >
+              <Printer className="w-5 h-5" />
+              Print Document
             </button>
           </div>
         </div>
@@ -830,7 +909,7 @@ function DocumentPreview({ data, onBack, onDownloadPDF, onDownloadDOC }: {
               </div>
 
               {/* Materials Table */}
-              <div className="mb-8">
+              <div className="mb-8 page-break-avoid">
                 <table className="w-full border-collapse border-2 border-black">
                   <thead>
                     <tr className="border-b-2 border-black">
@@ -858,7 +937,7 @@ function DocumentPreview({ data, onBack, onDownloadPDF, onDownloadDOC }: {
             </div>
 
             {/* Completion Certificate Section */}
-            <div className="border-t-2 border-black pt-8">
+            <div className="border-t-2 border-black pt-8 page-break-avoid">
               <div className="text-center mb-6">
                 <h3 className="text-lg font-bold tracking-wide uppercase">COMPLETION CERTIFICATE</h3>
               </div>
@@ -912,7 +991,7 @@ function DocumentPreview({ data, onBack, onDownloadPDF, onDownloadDOC }: {
               </div>
 
               {/* Signature Section */}
-              <div className="mt-12 pt-6">
+              <div className="mt-12 pt-6 signature-section page-break-avoid">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
                   <div className="text-center">
                     <p className="font-bold text-lg mb-2">Signature of C & M</p>
@@ -931,5 +1010,6 @@ function DocumentPreview({ data, onBack, onDownloadPDF, onDownloadDOC }: {
         </div>
       </div>
     </div>
+    </>
   );
 }
