@@ -587,10 +587,16 @@ export default function Home() {
                                 placeholder="Unit"
                                 styles={{
                                   ...customSelectStyles,
-                                  control: (provided, state) => ({
-                                    ...customSelectStyles.control?.(provided, state),
+                                  control: (provided: Record<string, unknown>) => ({
+                                    ...provided,
                                     minHeight: '48px',
-                                    fontSize: '14px'
+                                    fontSize: '14px',
+                                    border: '2px solid #d1d5db',
+                                    borderRadius: '0.5rem',
+                                    backgroundColor: '#ffffff',
+                                    '&:hover': {
+                                      borderColor: '#9ca3af'
+                                    }
                                   })
                                 }}
                                 isClearable
