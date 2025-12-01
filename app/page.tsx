@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
 import Select from 'react-select';
 import CreatableSelect from 'react-select/creatable';
-import { FileText, Plus, Trash2, Download, Eye, Building2, Printer, Loader2 } from 'lucide-react';
+import { FileText, Plus, Trash2, Download, Eye, Building2, Printer, Loader2, ArrowUp } from 'lucide-react';
 import { generatePDF } from './lib/pdf-generator'; // generateDOC commented out
 
 // Import JSON data
@@ -213,6 +213,51 @@ function Footer() {
   );
 }
 
+// Scroll to Top Component
+function ScrollToTop() {
+  const [isVisible, setIsVisible] = useState(false);
+
+  // Show button when page is scrolled up to given distance
+  const toggleVisibility = () => {
+    if (window.pageYOffset > 300) {
+      setIsVisible(true);
+    } else {
+      setIsVisible(false);
+    }
+  };
+
+  // Set the top coordinate to 0
+  // make scrolling smooth
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
+
+  useEffect(() => {
+    window.addEventListener('scroll', toggleVisibility);
+    return () => {
+      window.removeEventListener('scroll', toggleVisibility);
+    };
+  }, []);
+
+  return (
+    <div className="fixed bottom-6 right-6 z-50 print:hidden">
+      {isVisible && (
+        <button
+          type="button"
+          onClick={scrollToTop}
+          className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+          aria-label="Scroll to top"
+        >
+          <ArrowUp className="h-5 w-5 md:h-6 md:w-6" />
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function Home() {
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [formData, setFormData] = useState<WorkOrderData | null>(null);
@@ -288,6 +333,7 @@ export default function Home() {
         <div className="print-hide">
           <Footer />
         </div>
+        <ScrollToTop />
       </div>
     );
   }
@@ -753,6 +799,7 @@ export default function Home() {
         </div>
       </div>
       <Footer />
+      <ScrollToTop />
     </div>
   );
 }
